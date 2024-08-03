@@ -17,17 +17,35 @@ function MainComponent() {
     setCurrentPage("predictor");
   };
 
-  const startPrediction = () => {
+  const startPrediction = async () => {
     setIsPredicting(true);
-    let currentValue = 1.0;
-    const interval = setInterval(() => {
-      currentValue += 0.01;
-      setPredictionValue(Number(currentValue.toFixed(2)));
-      if (currentValue >= 2.06) {
-        clearInterval(interval);
-        setIsPredicting(false);
-      }
-    }, 50);
+    try {
+      const response = await fetch("https://your-backend-api.com/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          hour: [new Date().getHours()],
+          day_of_week: [new Date().getDay()],
+          day_of_month: [new Date().getDate()],
+          month: [new Date().getMonth() + 1],
+          is_weekend: [new Date().getDay() >= 5 ? 1 : 0],
+          rolling_mean: [0.5],  // Placeholder values
+          rolling_std: [0.1],   // Placeholder values
+          rolling_max: [1],     // Placeholder values
+          rolling_min: [0],     // Placeholder values
+          prev_result_1: [1],   // Placeholder values
+          prev_result_2: [0],   // Placeholder values
+          prev_result_3: [1],   // Placeholder values
+        }),
+      });
+      const data = await response.json();
+      setPredictionValue(data.prediction);
+    } catch (error) {
+      console.error("Error fetching prediction:", error);
+    }
+    setIsPredicting(false);
   };
 
   const renderSignInPage = () => (
@@ -35,7 +53,6 @@ function MainComponent() {
       <button className="text-2xl mb-4">
         <i className="fas fa-arrow-left"></i>
       </button>
-
       <div className="flex flex-col items-center justify-center h-[80vh]">
         <img
           src="/aviator-logo.png"
@@ -45,7 +62,6 @@ function MainComponent() {
         <h1 className="text-[#ff3333] text-2xl font-bold mb-8">
           Aviator Predictor v1.0
         </h1>
-
         <form className="w-full max-w-sm" onSubmit={handleSignIn}>
           <div className="mb-4">
             <input
@@ -78,7 +94,6 @@ function MainComponent() {
             Sign In
           </button>
         </form>
-
         <p className="text-gray-400">
           Don't have an account?{" "}
           <a href="#" className="text-[#ff3333]">
@@ -97,7 +112,6 @@ function MainComponent() {
       >
         <i className="fas fa-arrow-left"></i>
       </button>
-
       <div className="grid grid-cols-2 gap-4 mt-8">
         <div
           className="bg-white p-4 rounded"
